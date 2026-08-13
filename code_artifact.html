@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>랜덤 모둠 구성기</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --border-color: #e2e8f0;
+      --accent-badge: #8b5cf6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 24px 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      color: var(--text-sub);
+    }
+
+    .input-section {
+      background-color: var(--card-bg);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 868px) {
+      .input-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    label span.hint {
+      font-size: 0.85rem;
+      font-weight: normal;
+      color: var(--text-sub);
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 1rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .counter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: #f1f5f9;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      padding: 8px 12px;
+      font-size: 1.2rem;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      min-width: 130px;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: white;
+      background-color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.btn-secondary {
+      background-color: #64748b;
+    }
+
+    button.btn-secondary:hover {
+      background-color: #475569;
+    }
+
+    button.btn-outline {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    button.btn-outline:hover {
+      background-color: #f1f5f9;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .group-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .group-card {
+      background-color: var(--card-bg);
+      border-radius: 14px;
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .group-title {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .group-members {
+      padding: 16px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .member-item {
+      padding: 8px 12px;
+      background-color: #f8fafc;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #edf2f7;
+      gap: 8px;
+    }
+
+    .member-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .member-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .member-num {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      min-width: 20px;
+    }
+
+    .member-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .group-select {
+      padding: 4px 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: white;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .group-select:focus {
+      border-color: var(--primary);
+    }
+
+    .fixed-badge {
+      font-size: 0.75rem;
+      background-color: #e0e7ff;
+      color: #4338ca;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    /* 알림 및 모달 */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      z-index: 1000;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎲 무작위 모둠 구성기</h1>
+      <p class="subtitle">학생 명단과 지정 모둠을 입력하고, 구성 완료 후에도 학생의 모둠을 직접 변경할 수 있습니다.</p>
+    </header>
+
+    <section class="input-section">
+      <div class="form-group">
+        <label for="nameInput">
+          학생 명단
+          <span class="hint">한 줄에 한 명씩</span>
+        </label>
+        <textarea id="nameInput" placeholder="김철수&#10;이영희&#10;박민수&#10;정지원&#10;최동현&#10;강서연"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="fixedInput">
+          📌 고정 모둠 지정 (선택)
+          <span class="hint">이름: 모둠번호</span>
+        </label>
+        <textarea id="fixedInput" placeholder="김철수: 1&#10;이영희: 2"></textarea>
+      </div>
+
+      <div class="controls" style="grid-column: 1 / -1;">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+          <div class="counter-group">
+            <label for="groupCount" style="margin:0;">만들 모둠 개수:</label>
+            <input type="number" id="groupCount" min="1" max="30" value="4">
+            <span style="font-size: 1.1rem; font-weight: 600;">개 모둠</span>
+          </div>
+
+          <div class="btn-group">
+            <button onclick="makeGroups()">🎲 모둠 짜기</button>
+            <button class="btn-secondary" onclick="copyResult()">📋 결과 복사</button>
+            <button class="btn-outline" onclick="openResetModal()">🔄 초기화</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="result-header">
+        <h2 style="font-size: 1.5rem; margin-bottom: 16px;" id="resultTitle">모둠 결과</h2>
+      </div>
+      <div class="group-grid" id="groupGrid">
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-sub); padding: 40px 0; font-size: 1.1rem;">
+          이름을 입력한 후 [모둠 짜기] 버튼을 눌러주세요.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Toast Message -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Reset Confirmation Modal -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-card">
+      <h3 style="font-size: 1.2rem; margin-bottom: 8px;">초기화 확인</h3>
+      <p style="color: var(--text-sub);">입력한 명단과 고정 모둠 설정을 모두 삭제하시겠습니까?</p>
+      <div class="modal-btns">
+        <button class="btn-outline" onclick="closeResetModal()">취소</button>
+        <button onclick="resetForm()">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById('nameInput');
+    const fixedInput = document.getElementById('fixedInput');
+    const groupCountInput = document.getElementById('groupCount');
+    const groupGrid = document.getElementById('groupGrid');
+    const toast = document.getElementById('toast');
+    const modalOverlay = document.getElementById('modalOverlay');
+
+    // 생성된 현재 모둠 데이터 상태
+    let currentGroups = [];
+
+    // 샘플 데이터
+    const defaultNames = "김철수\n이영희\n박민수\n정지원\n최동현\n강서연\n윤준서\n한지민\n임도윤\n송하은\n조현우\n배수빈";
+    const defaultFixed = "김철수: 1\n이영희: 2";
+
+    // 페이지 로드시 자동 로드
+    window.onload = function() {
+      const savedNames = localStorage.getItem('teacher_student_names');
+      const savedFixed = localStorage.getItem('teacher_fixed_students');
+      
+      nameInput.value = savedNames !== null ? savedNames : defaultNames;
+      fixedInput.value = savedFixed !== null ? savedFixed : defaultFixed;
+    };
+
+    // 자동 저장
+    nameInput.addEventListener('input', function() {
+      localStorage.setItem('teacher_student_names', nameInput.value);
+    });
+
+    fixedInput.addEventListener('input', function() {
+      localStorage.setItem('teacher_fixed_students', fixedInput.value);
+    });
+
+    function showToast(message) {
+      toast.innerText = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
+    }
+
+    function openResetModal() {
+      modalOverlay.style.display = 'flex';
+    }
+
+    function closeResetModal() {
+      modalOverlay.style.display = 'none';
+    }
+
+    function makeGroups() {
+      // 1. 일반 명단 파싱
+      const rawText = nameInput.value;
+      let names = rawText.split('\n')
+        .map(name => name.trim())
+        .filter(name => name.length > 0);
+
+      const numGroups = parseInt(groupCountInput.value);
+
+      if (isNaN(numGroups) || numGroups < 1) {
+        showToast('올바른 모둠 개수를 입력해 주세요.');
+        return;
+      }
+
+      // 2. 고정 모둠 파싱 (이름: 모둠번호)
+      const fixedLines = fixedInput.value.split('\n');
+      const fixedAssignments = {};
+      const fixedNames = new Set();
+
+      for (let line of fixedLines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        const parts = trimmed.split(/[:=,\t]+/);
+        if (parts.length >= 2) {
+          const studentName = parts[0].trim();
+          const targetGroupNum = parseInt(parts[1].trim(), 10);
+
+          if (studentName && !isNaN(targetGroupNum)) {
+            if (targetGroupNum < 1 || targetGroupNum > numGroups) {
+              showToast(`고정 배치된 [${studentName}]의 모둠 번호(${targetGroupNum})가 지정된 총 모둠 수를 벗어났습니다.`);
+              return;
+            }
+            fixedAssignments[studentName] = targetGroupNum - 1;
+            fixedNames.add(studentName);
+          }
+        }
+      }
+
+      // 고정 명단 중 전체 학생 명단에 없는 이름이 있다면 명단에 추가
+      fixedNames.forEach(fName => {
+        if (!names.includes(fName)) {
+          names.push(fName);
+        }
+      });
+
+      if (names.length === 0) {
+        showToast('학생 이름을 최소 한 명 이상 입력해 주세요.');
+        return;
+      }
+
+      if (numGroups > names.length) {
+        showToast('모둠 수가 전체 학생 수보다 많습니다.');
+        return;
+      }
+
+      // 3. 모둠 생성 및 고정 학생 우선배치
+      const groups = Array.from({ length: numGroups }, () => []);
+
+      names.forEach(name => {
+        if (fixedNames.has(name)) {
+          const targetIdx = fixedAssignments[name];
+          groups[targetIdx].push({ name: name, isFixed: true });
+        }
+      });
+
+      // 4. 나머지 무작위 학생들 셔플 (Fisher-Yates)
+      const unassignedNames = names.filter(name => !fixedNames.has(name));
+      for (let i = unassignedNames.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unassignedNames[i], unassignedNames[j]] = [unassignedNames[j], unassignedNames[i]];
+      }
+
+      // 5. 인원수가 가장 적은 모둠부터 채워 넣기 (균등 분배)
+      unassignedNames.forEach(name => {
+        let minGroupIdx = 0;
+        for (let g = 1; g < numGroups; g++) {
+          if (groups[g].length < groups[minGroupIdx].length) {
+            minGroupIdx = g;
+          }
+        }
+        groups[minGroupIdx].push({ name: name, isFixed: false });
+      });
+
+      currentGroups = groups;
+      renderGroups();
+      showToast('새로운 모둠이 완성되었습니다!');
+    }
+
+    function moveStudent(fromGroupIdx, memberIdx, targetGroupIdx) {
+      targetGroupIdx = parseInt(targetGroupIdx, 10);
+      if (fromGroupIdx === targetGroupIdx) return;
+
+      const student = currentGroups[fromGroupIdx][memberIdx];
+      currentGroups[fromGroupIdx].splice(memberIdx, 1);
+      currentGroups[targetGroupIdx].push(student);
+
+      renderGroups();
+      showToast(`[${student.name}] 학생을 ${targetGroupIdx + 1} 모둠으로 이동했습니다.`);
+    }
+
+    function renderGroups() {
+      groupGrid.innerHTML = '';
+      if (!currentGroups || currentGroups.length === 0) {
+        groupGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-sub); padding: 40px 0; font-size: 1.1rem;">이름을 입력한 후 [모둠 짜기] 버튼을 눌러주세요.</div>';
+        return;
+      }
+
+      const colors = ['#4f46e5', '#059669', '#d97706', '#dc2626', '#7c3aed', '#2563eb', '#0891b2', '#db2777'];
+
+      currentGroups.forEach((group, groupIdx) => {
+        // 모둠 내 학생 명렬 내림차순 정렬 (ㅎ -> ㄱ / Z -> A / 큰 수 -> 작은 수)
+        group.sort((a, b) => b.name.localeCompare(a.name, 'ko', { numeric: true }));
+
+        const card = document.createElement('div');
+        card.className = 'group-card';
+
+        const color = colors[groupIdx % colors.length];
+
+        const title = document.createElement('div');
+        title.className = 'group-title';
+        title.style.backgroundColor = color;
+        title.innerText = `${groupIdx + 1} 모둠 (${group.length}명)`;
+
+        const ul = document.createElement('ul');
+        ul.className = 'group-members';
+
+        group.forEach((memberObj, memberIdx) => {
+          const li = document.createElement('li');
+          li.className = 'member-item';
+          
+          const memberInfo = document.createElement('div');
+          memberInfo.className = 'member-info';
+          memberInfo.innerHTML = `<span class="member-num">${memberIdx + 1}</span><span class="member-name">${memberObj.name}</span>`;
+
+          const actions = document.createElement('div');
+          actions.className = 'member-actions';
+
+          if (memberObj.isFixed) {
+            const badge = document.createElement('span');
+            badge.className = 'fixed-badge';
+            badge.innerText = '📌 고정';
+            actions.appendChild(badge);
+          }
+
+          // 모둠 변경 드롭다운
+          const select = document.createElement('select');
+          select.className = 'group-select';
+          select.title = '모둠 변경';
+          select.onchange = (e) => moveStudent(groupIdx, memberIdx, e.target.value);
+
+          for (let g = 0; g < currentGroups.length; g++) {
+            const opt = document.createElement('option');
+            opt.value = g;
+            opt.text = `${g + 1}모둠`;
+            if (g === groupIdx) opt.selected = true;
+            select.appendChild(opt);
+          }
+
+          actions.appendChild(select);
+
+          li.appendChild(memberInfo);
+          li.appendChild(actions);
+          ul.appendChild(li);
+        });
+
+        card.appendChild(title);
+        card.appendChild(ul);
+        groupGrid.appendChild(card);
+      });
+    }
+
+    function copyResult() {
+      if (!currentGroups || currentGroups.length === 0) {
+        showToast('복사할 모둠 결과가 없습니다.');
+        return;
+      }
+
+      let textResult = '[ 모둠 구성 결과 ]\n\n';
+      currentGroups.forEach((group, idx) => {
+        const membersText = group
+          .map(m => m.name + (m.isFixed ? ' (📌고정)' : ''))
+          .join(', ');
+        textResult += `${idx + 1} 모둠 (${group.length}명): ${membersText}\n`;
+      });
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = textResult;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+
+      showToast('클립보드에 변경된 모둠 결과가 복사되었습니다!');
+    }
+
+    function resetForm() {
+      nameInput.value = '';
+      fixedInput.value = '';
+      currentGroups = [];
+      localStorage.removeItem('teacher_student_names');
+      localStorage.removeItem('teacher_fixed_students');
+      groupGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-sub); padding: 40px 0; font-size: 1.1rem;">이름을 입력한 후 [모둠 짜기] 버튼을 눌러주세요.</div>';
+      closeResetModal();
+      showToast('초기화되었습니다.');
+    }
+  </script>
+</body>
+</html>
